@@ -3,6 +3,12 @@ from pathlib import Path
 import duckdb
 import boto3
 
+# IMPORTANT NOTE : Use it in local. Configure AWS Key with your account
+
+
+with open("config.json", "r", encoding="utf-8") as fichier:
+    donnees = json.load(fichier)
+
 OUT_DIR = Path("tpcds_data")
 OUT_DIR.mkdir(exist_ok=True)
 
@@ -62,6 +68,6 @@ prefix = "tpcds/"
 for file in OUT_DIR.iterdir():
     s3.upload_file(
         str(file),
-        'tpcdsnicolasstage',
+        donnees.get("s3_bucket"),
         f"{prefix}{file.name}"
     )
