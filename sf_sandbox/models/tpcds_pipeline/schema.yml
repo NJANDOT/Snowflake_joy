@@ -1,0 +1,237 @@
+version: 2
+
+models:
+
+  # ---------------------------------------------------------------------------
+  # Parquet
+  # ---------------------------------------------------------------------------
+
+  - name: call_center
+    description: "Bronze — Call center dimension. SCD type 2."
+    columns:
+      - name: cc_call_center_sk
+        description: "Surrogate key — not unique, SCD type 2."
+        data_tests:
+          - not_null
+
+  - name: catalog_sales
+    description: "Bronze — Catalog sales fact table."
+    columns:
+      - name: cs_order_number
+        description: "Order number."
+        data_tests:
+          - not_null
+      - name: cs_item_sk
+        data_tests:
+          - not_null
+
+  - name: customer_demographics
+    description: "Bronze — Customer demographics dimension."
+    columns:
+      - name: cd_demo_sk
+        description: "Surrogate key."
+        data_tests:
+          - not_null
+          - unique
+
+  - name: income_band
+    description: "Bronze — Income band dimension."
+    columns:
+      - name: ib_income_band_sk
+        description: "Surrogate key."
+        data_tests:
+          - not_null
+          - unique
+
+  - name: promotion
+    description: "Bronze — Promotion dimension."
+    columns:
+      - name: p_promo_sk
+        description: "Surrogate key."
+        data_tests:
+          - not_null
+          - unique
+
+  - name: store
+    description: "Bronze — Store dimension. SCD type 2."
+    columns:
+      - name: s_store_sk
+        description: "Surrogate key — not unique, SCD type 2."
+        data_tests:
+          - not_null
+
+  - name: time_dim
+    description: "Bronze — Time dimension."
+    columns:
+      - name: t_time_sk
+        description: "Surrogate key."
+        data_tests:
+          - not_null
+          - unique
+
+  - name: web_returns
+    description: "Bronze — Web returns fact table."
+    columns:
+      - name: wr_order_number
+        data_tests:
+          - not_null
+      - name: wr_item_sk
+        data_tests:
+          - not_null
+
+  # ---------------------------------------------------------------------------
+  # CSV
+  # ---------------------------------------------------------------------------
+
+  - name: catalog_page
+    description: "Bronze — Catalog page dimension."
+    columns:
+      - name: cp_catalog_page_sk
+        description: "Surrogate key."
+        data_tests:
+          - not_null
+          - unique
+
+  - name: customer
+    description: "Bronze — Customer dimension."
+    columns:
+      - name: c_customer_sk
+        description: "Surrogate key."
+        data_tests:
+          - not_null
+          - unique
+
+  - name: date_dim
+    description: "Bronze — Date dimension."
+    columns:
+      - name: d_date_sk
+        description: "Surrogate key."
+        data_tests:
+          - not_null
+          - unique
+
+  - name: inventory
+    description: "Bronze — Inventory fact table."
+    columns:
+      - name: inv_date_sk
+        data_tests:
+          - not_null
+      - name: inv_item_sk
+        data_tests:
+          - not_null
+      - name: inv_warehouse_sk
+        data_tests:
+          - not_null
+
+  - name: reason
+    description: "Bronze — Return reason dimension."
+    columns:
+      - name: r_reason_sk
+        description: "Surrogate key."
+        data_tests:
+          - not_null
+          - unique
+
+  - name: store_returns
+    description: "Bronze — Store returns fact table."
+    columns:
+      - name: sr_ticket_number
+        data_tests:
+          - not_null
+      - name: sr_item_sk
+        data_tests:
+          - not_null
+
+  - name: warehouse
+    description: "Bronze — Warehouse dimension."
+    columns:
+      - name: w_warehouse_sk
+        description: "Surrogate key."
+        data_tests:
+          - not_null
+          - unique
+
+  - name: web_sales
+    description: "Bronze — Web sales fact table."
+    columns:
+      - name: ws_order_number
+        data_tests:
+          - not_null
+      - name: ws_item_sk
+        data_tests:
+          - not_null
+
+  # ---------------------------------------------------------------------------
+  # JSON
+  # ---------------------------------------------------------------------------
+
+  - name: catalog_returns
+    description: "Bronze — Catalog returns fact table."
+    columns:
+      - name: cr_order_number
+        data_tests:
+          - not_null
+      - name: cr_item_sk
+        data_tests:
+          - not_null
+
+  - name: customer_address
+    description: "Bronze — Customer address dimension."
+    columns:
+      - name: ca_address_sk
+        description: "Surrogate key."
+        data_tests:
+          - not_null
+          - unique
+
+  - name: household_demographics
+    description: "Bronze — Household demographics dimension."
+    columns:
+      - name: hd_demo_sk
+        description: "Surrogate key."
+        data_tests:
+          - not_null
+          - unique
+
+  - name: item
+    description: "Bronze — Item dimension. SCD type 2."
+    columns:
+      - name: i_item_sk
+        description: "Surrogate key — not unique, SCD type 2."
+        data_tests:
+          - not_null
+
+  - name: ship_mode
+    description: "Bronze — Shipping mode dimension."
+    columns:
+      - name: sm_ship_mode_sk
+        description: "Surrogate key."
+        data_tests:
+          - not_null
+          - unique
+
+  - name: store_sales
+    description: "Bronze — Store sales fact table."
+    columns:
+      - name: ss_ticket_number
+        data_tests:
+          - not_null
+      - name: ss_item_sk
+        data_tests:
+          - not_null
+
+  - name: web_page
+    description: "Bronze — Web page dimension. SCD type 2."
+    columns:
+      - name: wp_web_page_sk
+        description: "Surrogate key — not unique, SCD type 2."
+        data_tests:
+          - not_null
+
+  - name: web_site
+    description: "Bronze — Web site dimension. SCD type 2."
+    columns:
+      - name: web_site_sk
+        description: "Surrogate key — not unique, SCD type 2."
+        data_tests:
+          - not_null

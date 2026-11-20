@@ -3,7 +3,7 @@
 {% set create_stage %}
 CREATE STAGE IF NOT EXISTS {{ var('stages')['raw'] }}
     STORAGE_INTEGRATION = s3_int
-    URL = 's3://{{ var("bucket_name") }}'
+    URL = 's3://{{ var("bucket_name") }}/tpcds/'
 {% endset %}
 
 {% set create_csv %}

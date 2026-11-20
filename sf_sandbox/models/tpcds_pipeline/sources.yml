@@ -12,14 +12,11 @@ sources:
     tables:
 
       # -----------------------------------------------------------------------
-      # PARQUET tables
+      # Parquet
       # -----------------------------------------------------------------------
 
       - name: call_center
-        description: "Call center dimension. Each row represents a point-in-time snapshot of a call center (SCD type 2)."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/call_center.parquet"
-          file_format: "{{ var('file_formats')['parquet'] }}"
+        description: "Call center dimension. SCD type 2."
         columns:
           - name: cc_call_center_sk
             description: "Surrogate key."
@@ -31,7 +28,7 @@ sources:
             description: "SCD2 record start date."
             data_type: DATE
           - name: cc_rec_end_date
-            description: "SCD2 record end date (NULL = current record)."
+            description: "SCD2 record end date. NULL = current record."
             data_type: DATE
           - name: cc_closed_date_sk
             description: "FK to date_dim — date the call center was closed."
@@ -92,9 +89,6 @@ sources:
 
       - name: catalog_sales
         description: "Catalog sales fact table. Each row is a line item in a catalog order."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/catalog_sales.parquet"
-          file_format: "{{ var('file_formats')['parquet'] }}"
         columns:
           - name: cs_sold_date_sk
             description: "FK to date_dim."
@@ -178,9 +172,6 @@ sources:
 
       - name: customer_demographics
         description: "Customer demographics dimension."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/customer_demographics.parquet"
-          file_format: "{{ var('file_formats')['parquet'] }}"
         columns:
           - name: cd_demo_sk
             description: "Surrogate key."
@@ -204,9 +195,6 @@ sources:
 
       - name: income_band
         description: "Income band dimension."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/income_band.parquet"
-          file_format: "{{ var('file_formats')['parquet'] }}"
         columns:
           - name: ib_income_band_sk
             description: "Surrogate key."
@@ -218,9 +206,6 @@ sources:
 
       - name: promotion
         description: "Promotion dimension."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/promotion.parquet"
-          file_format: "{{ var('file_formats')['parquet'] }}"
         columns:
           - name: p_promo_sk
             description: "Surrogate key."
@@ -267,10 +252,7 @@ sources:
             data_type: VARCHAR
 
       - name: store
-        description: "Store dimension (SCD type 2)."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/store.parquet"
-          file_format: "{{ var('file_formats')['parquet'] }}"
+        description: "Store dimension. SCD type 2."
         columns:
           - name: s_store_sk
             description: "Surrogate key."
@@ -335,9 +317,6 @@ sources:
 
       - name: time_dim
         description: "Time dimension — second-level granularity."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/time_dim.parquet"
-          file_format: "{{ var('file_formats')['parquet'] }}"
         columns:
           - name: t_time_sk
             description: "Surrogate key."
@@ -365,9 +344,6 @@ sources:
 
       - name: web_returns
         description: "Web returns fact table."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/web_returns.parquet"
-          file_format: "{{ var('file_formats')['parquet'] }}"
         columns:
           - name: wr_returned_date_sk
             description: "FK to date_dim."
@@ -424,14 +400,11 @@ sources:
             data_type: VARCHAR
 
       # -----------------------------------------------------------------------
-      # CSV tables
+      # CSV
       # -----------------------------------------------------------------------
 
       - name: catalog_page
         description: "Catalog page dimension."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/catalog_page.csv"
-          file_format: "{{ var('file_formats')['csv'] }}"
         columns:
           - name: cp_catalog_page_sk
             description: "Surrogate key."
@@ -458,9 +431,6 @@ sources:
 
       - name: customer
         description: "Customer dimension."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/customer.csv"
-          file_format: "{{ var('file_formats')['csv'] }}"
         columns:
           - name: c_customer_sk
             description: "Surrogate key."
@@ -509,9 +479,6 @@ sources:
 
       - name: date_dim
         description: "Date dimension — day-level granularity."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/date_dim.csv"
-          file_format: "{{ var('file_formats')['csv'] }}"
         columns:
           - name: d_date_sk
             description: "Surrogate key."
@@ -578,9 +545,6 @@ sources:
 
       - name: inventory
         description: "Inventory fact table."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/inventory.csv"
-          file_format: "{{ var('file_formats')['csv'] }}"
         columns:
           - name: inv_date_sk
             description: "FK to date_dim."
@@ -596,9 +560,6 @@ sources:
 
       - name: reason
         description: "Return reason dimension."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/reason.csv"
-          file_format: "{{ var('file_formats')['csv'] }}"
         columns:
           - name: r_reason_sk
             description: "Surrogate key."
@@ -611,9 +572,6 @@ sources:
 
       - name: store_returns
         description: "Store returns fact table."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/store_returns.csv"
-          file_format: "{{ var('file_formats')['csv'] }}"
         columns:
           - name: sr_returned_date_sk
             description: "FK to date_dim."
@@ -664,9 +622,6 @@ sources:
 
       - name: warehouse
         description: "Warehouse dimension."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/warehouse.csv"
-          file_format: "{{ var('file_formats')['csv'] }}"
         columns:
           - name: w_warehouse_sk
             description: "Surrogate key."
@@ -701,9 +656,6 @@ sources:
 
       - name: web_sales
         description: "Web sales fact table."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/web_sales.csv"
-          file_format: "{{ var('file_formats')['csv'] }}"
         columns:
           - name: ws_sold_date_sk
             description: "FK to date_dim."
@@ -784,14 +736,11 @@ sources:
             data_type: FLOAT
 
       # -----------------------------------------------------------------------
-      # JSON tables
+      # JSON
       # -----------------------------------------------------------------------
 
       - name: catalog_returns
         description: "Catalog returns fact table."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/catalog_returns.json"
-          file_format: "{{ var('file_formats')['json'] }}"
         columns:
           - name: cr_returned_date_sk
             description: "FK to date_dim."
@@ -859,9 +808,6 @@ sources:
 
       - name: customer_address
         description: "Customer address dimension."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/customer_address.json"
-          file_format: "{{ var('file_formats')['json'] }}"
         columns:
           - name: ca_address_sk
             description: "Surrogate key."
@@ -894,9 +840,6 @@ sources:
 
       - name: household_demographics
         description: "Household demographics dimension."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/household_demographics.json"
-          file_format: "{{ var('file_formats')['json'] }}"
         columns:
           - name: hd_demo_sk
             description: "Surrogate key."
@@ -912,10 +855,7 @@ sources:
             data_type: NUMBER
 
       - name: item
-        description: "Item dimension (SCD type 2)."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/item.json"
-          file_format: "{{ var('file_formats')['json'] }}"
+        description: "Item dimension. SCD type 2."
         columns:
           - name: i_item_sk
             description: "Surrogate key."
@@ -927,7 +867,7 @@ sources:
             data_type: VARCHAR
           - name: i_rec_end_date
             description: "NULL = current record."
-            data_type: VARIANT
+            data_type: VARCHAR
           - name: i_item_desc
             data_type: VARCHAR
           - name: i_current_price
@@ -967,9 +907,6 @@ sources:
 
       - name: ship_mode
         description: "Shipping mode dimension."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/ship_mode.json"
-          file_format: "{{ var('file_formats')['json'] }}"
         columns:
           - name: sm_ship_mode_sk
             description: "Surrogate key."
@@ -988,9 +925,6 @@ sources:
 
       - name: store_sales
         description: "Store sales fact table."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/store_sales.json"
-          file_format: "{{ var('file_formats')['json'] }}"
         columns:
           - name: ss_sold_date_sk
             description: "FK to date_dim."
@@ -1046,10 +980,7 @@ sources:
             data_type: FLOAT
 
       - name: web_page
-        description: "Web page dimension (SCD type 2)."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/web_page.json"
-          file_format: "{{ var('file_formats')['json'] }}"
+        description: "Web page dimension. SCD type 2."
         columns:
           - name: wp_web_page_sk
             description: "Surrogate key."
@@ -1061,7 +992,7 @@ sources:
             data_type: VARCHAR
           - name: wp_rec_end_date
             description: "NULL = current record."
-            data_type: VARIANT
+            data_type: VARCHAR
           - name: wp_creation_date_sk
             description: "FK to date_dim."
             data_type: NUMBER
@@ -1087,10 +1018,7 @@ sources:
             data_type: NUMBER
 
       - name: web_site
-        description: "Web site dimension (SCD type 2)."
-        external:
-          location: "@{{ var('stages')['raw'] }}/tpcds/web_site.json"
-          file_format: "{{ var('file_formats')['json'] }}"
+        description: "Web site dimension. SCD type 2."
         columns:
           - name: web_site_sk
             description: "Surrogate key."
@@ -1102,7 +1030,7 @@ sources:
             data_type: VARCHAR
           - name: web_rec_end_date
             description: "NULL = current record."
-            data_type: VARIANT
+            data_type: VARCHAR
           - name: web_name
             data_type: VARCHAR
           - name: web_open_date_sk
@@ -1110,7 +1038,7 @@ sources:
             data_type: NUMBER
           - name: web_close_date_sk
             description: "NULL if still open."
-            data_type: VARIANT
+            data_type: VARCHAR
           - name: web_class
             data_type: VARCHAR
           - name: web_manager
