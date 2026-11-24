@@ -1,0 +1,147 @@
+name: terraform-snowflake
+
+# Validation and plan only. No apply: an apply is a human decision, run locally
+# until a remote state backend is configured (see snowflake_terraform/README.md).
+#
+# Values come from GitHub Environments "dev" and "prod" (Settings > Environments).
+# Each environment holds secrets/variables with the SAME names, so the matrix below
+# picks the right values for each environment.
+#
+#   Secrets   : SNOWFLAKE_PRIVATE_KEY, SNOWFLAKE_PRIVATE_KEY_PASSPHRASE,
+#               SNOWFLAKE_ORGANIZATION_NAME, SNOWFLAKE_ACCOUNT_NAME,
+#               SNOWFLAKE_USER, SNOWFLAKE_ROLE, STORAGE_AWS_ROLE_ARN
+#   Variables : SNOWFLAKE_WAREHOUSE, DATABASE_NAME, STORAGE_INTEGRATION_NAME,
+#               STORAGE_ALLOWED_LOCATIONS (JSON list, e.g. ["s3://bucket/prefix/"]),
+#               STAGE_URL, AWS_REGION,
+#               AWS_PLAN_ROLE_ARN (IAM role assumed by GitHub through OIDC),
+#               ADDITIONAL_TRUSTED_EXTERNAL_IDS (optional JSON list, default [])
+#
+# AWS credentials: no access key is stored in GitHub. The job gets short-lived
+# credentials through GitHub OIDC by assuming AWS_PLAN_ROLE_ARN. That role must
+# trust token.actions.githubusercontent.com for this repository, and only needs
+# read access for a plan: iam:GetRole, iam:ListRolePolicies,
+# iam:ListAttachedRolePolicies on the Snowflake role (plus sts:GetCallerIdentity).
+#
+# Each TF_VAR_<name> below feeds the Terraform variable <name>, so no
+# terraform.tfvars file exists in CI. TF_VAR_ values for variables that an
+# environment does not declare are ignored by Terraform.
+
+on:
+  pull_request:
+    paths:
+      - "snowflake_terraform/**"
+      - ".github/workflows/terraform-snowflake.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: terraform-snowflake-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "false"
+
+jobs:
+  fmt:
+    name: fmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.7"
+          terraform_wrapper: false
+
+      - name: terraform fmt
+        working-directory: snowflake_terraform
+        run: terraform fmt -recursive -check
+
+  plan:
+    name: plan (${{ matrix.env }})
+    needs: fmt
+    runs-on: ubuntu-latest
+    environment: ${{ matrix.env }}
+    permissions:
+      contents: read
+      id-token: write # required to request the OIDC token for AWS
+    strategy:
+      fail-fast: false
+      matrix:
+        env: [dev, prod]
+    defaults:
+      run:
+        # Explicit bash enables "-eo pipefail": a failing plan fails the step
+        # even when its output is piped to tee.
+        shell: bash
+        working-directory: snowflake_terraform/envs/${{ matrix.env }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.7"
+          terraform_wrapper: false
+
+      - name: AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_PLAN_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          role-session-name: terraform-snowflake-${{ matrix.env }}-${{ github.run_id }}
+
+      - name: terraform init
+        run: terraform init -backend=false -lockfile=readonly
+
+      - name: terraform validate
+        run: terraform validate
+
+      # The DEV root reads the key from a file (private_key = file(var.private_key)),
+      # so the secret is written to a private temporary file, deleted at the end.
+      # The PROD root reads SNOWFLAKE_PRIVATE_KEY from the environment instead.
+      - name: Snowflake private key file
+        env:
+          SNOWFLAKE_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_PRIVATE_KEY }}
+        run: |
+          umask 077
+          printf '%s\n' "$SNOWFLAKE_PRIVATE_KEY" > "$RUNNER_TEMP/snowflake_key.p8"
+
+      # Secrets are only exposed to this step.
+      - name: terraform plan
+        env:
+          # Provider credentials (PROD root: read directly by the provider)
+          SNOWFLAKE_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_PRIVATE_KEY }}
+          SNOWFLAKE_PRIVATE_KEY_PASSPHRASE: ${{ secrets.SNOWFLAKE_PRIVATE_KEY_PASSPHRASE }}
+          # Provider credentials (DEV root: Terraform variables)
+          TF_VAR_private_key: ${{ runner.temp }}/snowflake_key.p8
+          TF_VAR_private_key_passphrase: ${{ secrets.SNOWFLAKE_PRIVATE_KEY_PASSPHRASE }}
+          # Terraform variables (replace terraform.tfvars)
+          TF_VAR_snowflake_organization_name: ${{ secrets.SNOWFLAKE_ORGANIZATION_NAME }}
+          TF_VAR_snowflake_account_name: ${{ secrets.SNOWFLAKE_ACCOUNT_NAME }}
+          TF_VAR_snowflake_user: ${{ secrets.SNOWFLAKE_USER }}
+          TF_VAR_snowflake_role: ${{ secrets.SNOWFLAKE_ROLE }}
+          TF_VAR_storage_aws_role_arn: ${{ secrets.STORAGE_AWS_ROLE_ARN }}
+          TF_VAR_snowflake_warehouse: ${{ vars.SNOWFLAKE_WAREHOUSE }}
+          TF_VAR_database_name: ${{ vars.DATABASE_NAME }}
+          TF_VAR_storage_integration_name: ${{ vars.STORAGE_INTEGRATION_NAME }}
+          TF_VAR_storage_allowed_locations: ${{ vars.STORAGE_ALLOWED_LOCATIONS }}
+          TF_VAR_stage_url: ${{ vars.STAGE_URL }}
+          TF_VAR_aws_region: ${{ vars.AWS_REGION }}
+          TF_VAR_additional_trusted_external_ids: ${{ vars.ADDITIONAL_TRUSTED_EXTERNAL_IDS || '[]' }}
+        run: |
+          terraform plan -no-color -lock=false -out=tfplan | tee plan.txt
+          {
+            echo "<details><summary>terraform plan (${{ matrix.env }})</summary>"
+            echo
+            echo '```'
+            cat plan.txt
+            echo '```'
+            echo "</details>"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove private key file
+        if: always()
+        run: rm -f "$RUNNER_TEMP/snowflake_key.p8"

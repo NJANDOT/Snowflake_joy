@@ -1,3 +1,33 @@
 *.json
 *.parquet
 *.csv
+
+# -----------------------------------------------------------------------------
+# Terraform
+# -----------------------------------------------------------------------------
+# Provider plugins and module cache (recreated by `terraform init`)
+.terraform/
+# State files contain resource attributes in clear text: never commit them
+*.tfstate
+*.tfstate.*
+.terraform.tfstate.lock.info
+# Saved plans can embed sensitive values
+*.tfplan
+crash.log
+crash.*.log
+# NOTE: .terraform.lock.hcl is intentionally versioned (pins provider checksums)
+
+# -----------------------------------------------------------------------------
+# Secrets
+# -----------------------------------------------------------------------------
+# Personal Terraform credentials, loaded automatically by Terraform.
+# Only the *.auto.tfvars.example templates are versioned.
+*.auto.tfvars
+*.auto.tfvars.json
+# Generic dotenv files (none are used by this project, but never commit one)
+.env
+.env.*
+!.env.example
+# Private keys must live outside the repository (e.g. ~/.snowflake/keys/)
+*.p8
+*.pem

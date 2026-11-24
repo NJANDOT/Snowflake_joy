@@ -1,0 +1,6 @@
+# Shell scripts must keep LF endings, even when checked out on Windows
+*.sh   text eol=lf
+# Terraform files: normalize to LF in the repository
+*.tf   text eol=lf
+*.tfvars text eol=lf
+*.hcl  text eol=lf

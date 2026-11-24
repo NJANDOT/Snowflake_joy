@@ -1,0 +1,30 @@
+# LOCAL USE: copy to terraform.tfvars (git-ignored) and replace every <PLACEHOLDER>.
+# CI USE (GitHub Actions): this file is NOT used. The workflow
+# .github/workflows/terraform-snowflake.yml sets TF_VAR_<name> from the GitHub
+# Environment "prod". The comment next to each value gives the source.
+#
+# Never put the private key or its passphrase in this file. Locally, export
+# SNOWFLAKE_PRIVATE_KEY and SNOWFLAKE_PRIVATE_KEY_PASSPHRASE; in CI they come from
+# the secrets of the same name.
+
+snowflake_organization_name = "<SNOWFLAKE_ORGANIZATION>" # CI: secrets.SNOWFLAKE_ORGANIZATION_NAME
+snowflake_account_name      = "<SNOWFLAKE_ACCOUNT>"      # CI: secrets.SNOWFLAKE_ACCOUNT_NAME
+snowflake_user              = "<SNOWFLAKE_TERRAFORM_USER>" # CI: secrets.SNOWFLAKE_USER
+snowflake_role              = "<SNOWFLAKE_TERRAFORM_ROLE>" # CI: secrets.SNOWFLAKE_ROLE
+snowflake_warehouse         = "<SNOWFLAKE_WAREHOUSE>"    # CI: vars.SNOWFLAKE_WAREHOUSE
+
+database_name            = "TPCDS_PROD"               # CI: vars.DATABASE_NAME
+schema_name              = "TPCDS_PIPELINE_BRONZE"   # default value, no CI variable
+storage_integration_name = "S3_INT_PROD"              # CI: vars.STORAGE_INTEGRATION_NAME
+
+storage_aws_role_arn      = "arn:aws:iam::<AWS_ACCOUNT_ID>:role/<PROD_ROLE_NAME>" # CI: secrets.STORAGE_AWS_ROLE_ARN
+storage_allowed_locations = ["<PROD_STORAGE_URL>"]                                # CI: vars.STORAGE_ALLOWED_LOCATIONS (JSON list)
+stage_url                 = "<PROD_STORAGE_URL>"                                  # CI: vars.STAGE_URL, e.g. s3://<bucket>/<prod-prefix>/
+
+# AWS provider (manages the trust policy of the existing IAM role above).
+# AWS credentials are NOT set here: use $env:AWS_PROFILE or the standard AWS env vars.
+aws_region = "<AWS_REGION>" # e.g. ca-central-1 (IAM is global, any valid region works)
+
+# Other external IDs that must stay trusted by the role, e.g. another storage
+# integration of the same Snowflake account using this role (DESC INTEGRATION <name>).
+additional_trusted_external_ids = []

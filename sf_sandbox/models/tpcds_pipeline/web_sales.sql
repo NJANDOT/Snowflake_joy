@@ -1,3 +1,0 @@
-{{ config(materialized='table') }}
-
-select * from {{ source('tpcds_raw', 'web_sales') }}
